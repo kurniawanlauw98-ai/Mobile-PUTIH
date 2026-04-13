@@ -48,7 +48,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-app.post('/api/auth/register', async (req, res) => {
+app.post(['/api/auth/register', '/auth/register', '/api/index.js/auth/register'], async (req, res) => {
   const { name, email, password, semester } = req.body;
   if (!name || !email || !password || !semester) return res.status(400).json({ error: 'Wajib diisi' });
   const existingUser = users.find(u => u.email === email);
@@ -59,7 +59,7 @@ app.post('/api/auth/register', async (req, res) => {
   res.status(201).json({ message: 'Registrasi berhasil' });
 });
 
-app.post('/api/auth/login', async (req, res) => {
+app.post(['/api/auth/login', '/auth/login', '/api/index.js/auth/login'], async (req, res) => {
   const { email, password } = req.body;
   const user = users.find(u => u.email === email);
   if (!user) return res.status(400).json({ error: 'Salah kredensial' });
@@ -69,11 +69,11 @@ app.post('/api/auth/login', async (req, res) => {
   res.json({ token, user: { id: user.id, name: user.name, email: user.email, semester: user.semester, role: user.role } });
 });
 
-app.get('/api/courses', authenticateToken, (req, res) => {
+app.get(['/api/courses', '/courses', '/api/index.js/courses'], authenticateToken, (req, res) => {
   res.json(courses);
 });
 
-app.post('/api/courses', authenticateToken, (req, res) => {
+app.post(['/api/courses', '/courses', '/api/index.js/courses'], authenticateToken, (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Hanya Admin yang bisa upload materi' });
   const { name, semester } = req.body;
   if (!name || !semester) return res.status(400).json({ error: 'Nama dan semester materi wajib diisi' });
@@ -82,14 +82,14 @@ app.post('/api/courses', authenticateToken, (req, res) => {
   res.status(201).json({ message: 'Materi berhasil diunggah', course: newCourse });
 });
 
-app.get('/api/quiz/:courseId', authenticateToken, (req, res) => {
+app.get(['/api/quiz/:courseId', '/quiz/:courseId', '/api/index.js/quiz/:courseId'], authenticateToken, (req, res) => {
   const quiz = quizzes[req.params.courseId];
   if (!quiz) return res.status(404).json({ error: 'Tidak ditemukan.' });
   const safeQuiz = { ...quiz, questions: quiz.questions.map(q => ({ id: q.id, question: q.question, options: q.options })) };
   res.json(safeQuiz);
 });
 
-app.post('/api/quiz/:courseId/submit', authenticateToken, (req, res) => {
+app.post(['/api/quiz/:courseId/submit', '/quiz/:courseId/submit', '/api/index.js/quiz/:courseId/submit'], authenticateToken, (req, res) => {
   const { answers } = req.body;
   const quiz = quizzes[req.params.courseId];
   if (!quiz) return res.status(404).json({ error: 'Tidak ditemukan.' });
@@ -102,7 +102,7 @@ app.post('/api/quiz/:courseId/submit', authenticateToken, (req, res) => {
   res.json({ score: Math.round((score / quiz.questions.length) * 100), results });
 });
 
-app.post('/api/ai/chat', authenticateToken, async (req, res) => {
+app.post(['/api/ai/chat', '/ai/chat', '/api/index.js/ai/chat'], authenticateToken, async (req, res) => {
   const { message } = req.body;
   if (!message) return res.status(400).json({ error: 'Message req' });
   if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'dummy_key') {
