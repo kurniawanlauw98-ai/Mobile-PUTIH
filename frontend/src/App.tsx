@@ -7,6 +7,7 @@ import CourseDetail from './pages/CourseDetail';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Quiz from './pages/Quiz';
+import Admin from './pages/Admin';
 import { useAuth, AuthProvider } from './context/AuthContext';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -35,6 +36,7 @@ function App() {
         <Route path="/course/:id" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
         <Route path="/quiz/:id" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
         <Route path="/ai-tutor" element={<ProtectedRoute><AiTutor /></ProtectedRoute>} />
+        <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
       </Routes>
     </AuthProvider>
   );

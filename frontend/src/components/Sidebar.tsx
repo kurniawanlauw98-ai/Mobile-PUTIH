@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, BookOpen, Bot, LogOut, GraduationCap } from 'lucide-react';
+import { Home, BookOpen, Bot, LogOut, GraduationCap, Settings } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Sidebar() {
@@ -11,6 +11,11 @@ export default function Sidebar() {
     { name: 'Daftar Semester', icon: BookOpen, path: '/curriculum' },
     { name: 'AI Tutor', icon: Bot, path: '/ai-tutor' },
   ];
+
+  const { user } = useAuth();
+  if (user?.role === 'admin') {
+    menu.push({ name: 'Upload Materi', icon: Settings, path: '/admin' });
+  }
 
   return (
     <div className="w-64 h-screen bg-brand-dark text-white fixed top-0 left-0 flex flex-col shadow-xl">
