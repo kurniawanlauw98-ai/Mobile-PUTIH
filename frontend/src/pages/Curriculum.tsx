@@ -1,13 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, FileText } from 'lucide-react';
+import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 export default function Curriculum() {
-  const semesters = [
-    { num: 1, courses: [{ id: 1, name: "Pengantar Ilmu Hukum" }, { id: 2, name: "Pengantar Ilmu Sosial" }, { id: 3, name: "Pendidikan Kewarganegaraan" }] },
-    { num: 2, courses: [{ id: 4, name: "Hukum Perdata" }, { id: 5, name: "Hukum Pidana" }, { id: 6, name: "Hukum Tata Negara" }] },
-    { num: 3, courses: [{ id: 7, name: "Hukum Administrasi Negara" }, { id: 8, name: "Hukum Internasional" }] },
-  ];
+  const { token } = useAuth();
+  const [courses, setCourses] = useState<{id: number, name: string, semester: number, file_url?: string}[]>([]);
+
+  useEffect(() => {
+    if (token) {
+      axios.get('/api/courses', { headers: { Authorization: `Bearer ${token}` } })
+        .then(res => setCourses(res.data))
+        .catch(err => console.error("Gagal memuat materi", err));
+    }
+  }, [token]);
+
+  // Group by semester
+  const semesters = [1, 2, 3, 4, 5, 6, 7, 8].map(num => ({
+    num,
+    courses: courses.filter(c => c.semester === num)
+  })).filter(sem => sem.courses.length > 0);
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">

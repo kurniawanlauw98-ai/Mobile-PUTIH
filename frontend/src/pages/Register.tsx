@@ -5,7 +5,7 @@ import { GraduationCap } from 'lucide-react';
 
 export default function Register() {
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [nim, setNim] = useState('');
   const [password, setPassword] = useState('');
   const [semester, setSemester] = useState(1);
   const [error, setError] = useState('');
@@ -17,7 +17,7 @@ export default function Register() {
     setError('');
     setSuccess('');
     try {
-      await axios.post('/api/auth/register', { name, email, password, semester });
+      await axios.post('/api/auth/register', { name, nim, password, semester });
       setSuccess('Registrasi berhasil! Silakan login.');
       setTimeout(() => navigate('/login'), 2000);
     } catch (err: any) {
@@ -49,11 +49,12 @@ export default function Register() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">NIM Mahasiswa UT</label>
             <input 
-              type="email" required
+              type="text" required maxLength={15}
+              placeholder="Contoh: 041234567"
               className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-dark/20" 
-              value={email} onChange={e => setEmail(e.target.value)} 
+              value={nim} onChange={e => setNim(e.target.value.replace(/[^0-9]/g, ''))} 
             />
           </div>
           <div>

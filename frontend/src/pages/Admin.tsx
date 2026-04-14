@@ -7,6 +7,7 @@ export default function Admin() {
   const { token, user } = useAuth();
   const [name, setName] = useState('');
   const [semester, setSemester] = useState(1);
+  const [fileUrl, setFileUrl] = useState('');
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,11 +23,12 @@ export default function Admin() {
     setLoading(true);
 
     try {
-      await axios.post('/api/courses', { name, semester }, {
+      await axios.post('/api/courses', { name, semester, file_url: fileUrl }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSuccess(`Materi "${name}" berhasil diunggah ke Semester ${semester}!`);
       setName('');
+      setFileUrl('');
       setSemester(1);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Gagal mengunggah materi.');
@@ -63,6 +65,16 @@ export default function Admin() {
               type="text" required
               placeholder="Contoh: Hukum Tata Negara Modul 1"
               value={name} onChange={e => setName(e.target.value)}
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-dark/20 focus:border-brand-dark transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Tautan Materi (Google Drive / PDF)</label>
+            <input 
+              type="url" required
+              placeholder="Contoh: https://drive.google.com/..."
+              value={fileUrl} onChange={e => setFileUrl(e.target.value)}
               className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-dark/20 focus:border-brand-dark transition-all"
             />
           </div>

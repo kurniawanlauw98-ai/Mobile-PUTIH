@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { GraduationCap } from 'lucide-react';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [nim, setNim] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { login } = useAuth();
@@ -14,7 +14,7 @@ export default function Login() {
     e.preventDefault();
     setError('');
     try {
-      const res = await axios.post('/api/auth/login', { email, password });
+      const res = await axios.post('/api/auth/login', { nim, password });
       login(res.data.token, res.data.user);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Login gagal.');
@@ -36,13 +36,11 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">NIM (Nomor Induk Mahasiswa)</label>
             <input 
-              type="email" 
-              required
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-dark/20 focus:border-brand-dark transition-all outline-none" 
-              value={email} 
-              onChange={e => setEmail(e.target.value)} 
+              type="text" required placeholder="04xxxxxxx"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-dark/20" 
+              value={nim} onChange={e => setNim(e.target.value.replace(/[^0-9]/g, ''))} 
             />
           </div>
           <div>

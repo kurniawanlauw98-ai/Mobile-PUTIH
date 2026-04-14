@@ -17,13 +17,11 @@ const openai = new OpenAI({
 
 // Mock Database
 const users = [
-  { id: 1, name: 'Admin Pusat', email: 'admin@ut.ac.id', password: bcrypt.hashSync('admin123', 10), semester: 0, role: 'admin' }
+  { id: 1, name: 'Admin Pusat', nim: 'admin123', password: bcrypt.hashSync('admin123', 10), semester: 0, role: 'admin' }
 ];
 const courses = [
-  { id: 1, name: "Pengantar Ilmu Hukum", semester: 1 },
-  { id: 2, name: "Pengantar Ilmu Sosial", semester: 1 },
-  { id: 4, name: "Hukum Perdata", semester: 2 },
-  { id: 5, name: "Hukum Pidana", semester: 2 }
+  { id: 1, name: "Pengantar Ilmu Hukum", semester: 1, file_url: "" },
+  { id: 2, name: "Pengantar Ilmu Sosial", semester: 1, file_url: "" }
 ];
 
 const quizzes = {
@@ -49,24 +47,24 @@ const authenticateToken = (req, res, next) => {
 };
 
 app.post(['/api/auth/register', '/auth/register', '/api/index.js/auth/register'], async (req, res) => {
-  const { name, email, password, semester } = req.body;
-  if (!name || !email || !password || !semester) return res.status(400).json({ error: 'Wajib diisi' });
-  const existingUser = users.find(u => u.email === email);
-  if (existingUser) return res.status(400).json({ error: 'Email terdaftar' });
+  const { name, nim, password, semester } = req.body;
+  if (!name || !nim || !password || !semester) return res.status(400).json({ error: 'Wajib diisi' });
+  const existingUser = users.find(u => u.nim === nim);
+  if (existingUser) return res.status(400).json({ error: 'NIM sudah terdaftar' });
   const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = { id: Date.now(), name, email, semester, password: hashedPassword, role: 'student' };
+  const newUser = { id: Date.now(), name, nim, semester, password: hashedPassword, role: 'student' };
   users.push(newUser);
   res.status(201).json({ message: 'Registrasi berhasil' });
 });
 
 app.post(['/api/auth/login', '/auth/login', '/api/index.js/auth/login'], async (req, res) => {
-  const { email, password } = req.body;
-  const user = users.find(u => u.email === email);
-  if (!user) return res.status(400).json({ error: 'Salah kredensial' });
+  const { nim, password } = req.body;
+  const user = users.find(u => u.nim === nim);
+  if (!user) return res.status(400).json({ error: 'NIM atau Password salah' });
   const validPassword = await bcrypt.compare(password, user.password);
-  if (!validPassword) return res.status(400).json({ error: 'Salah kredensial' });
-  const token = jwt.sign({ id: user.id, email: user.email, name: user.name, semester: user.semester, role: user.role }, JWT_SECRET, { expiresIn: '2h' });
-  res.json({ token, user: { id: user.id, name: user.name, email: user.email, semester: user.semester, role: user.role } });
+  if (!validPassword) return res.status(400).json({ error: 'NIM atau Password salah' });
+  const token = jwt.sign({ id: user.id, nim: user.nim, name: user.name, semester: user.semester, role: user.role }, JWT_SECRET, { expiresIn: '2h' });
+  res.json({ token, user: { id: user.id, name: user.name, nim: user.nim, semester: user.semester, role: user.role } });
 });
 
 app.get(['/api/courses', '/courses', '/api/index.js/courses'], authenticateToken, (req, res) => {
@@ -75,9 +73,9 @@ app.get(['/api/courses', '/courses', '/api/index.js/courses'], authenticateToken
 
 app.post(['/api/courses', '/courses', '/api/index.js/courses'], authenticateToken, (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Hanya Admin yang bisa upload materi' });
-  const { name, semester } = req.body;
+  const { name, semester, file_url } = req.body;
   if (!name || !semester) return res.status(400).json({ error: 'Nama dan semester materi wajib diisi' });
-  const newCourse = { id: Date.now(), name, semester };
+  const newCourse = { id: Date.now(), name, semester, file_url: file_url || "" };
   courses.push(newCourse);
   res.status(201).json({ message: 'Materi berhasil diunggah', course: newCourse });
 });

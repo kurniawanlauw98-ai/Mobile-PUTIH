@@ -1,20 +1,37 @@
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FileText, PlayCircle, BookOpen, PenTool } from 'lucide-react';
+import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 export default function CourseDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { token } = useAuth();
+  
+  const [courseData, setCourseData] = useState<any>(null);
 
-  // Mock data based on id
+  useEffect(() => {
+    if (token) {
+      axios.get('/api/courses', { headers: { Authorization: `Bearer ${token}` } })
+        .then(res => {
+          const c = res.data.find((x: any) => x.id.toString() === id);
+          setCourseData(c);
+        })
+        .catch(err => console.error(err));
+    }
+  }, [id, token]);
+
+  if (!courseData) return <div className="p-8 text-center text-slate-500">Memuat Materi...</div>;
+
   const course = {
-    id,
-    name: "Pengantar Ilmu Hukum",
-    description: "Mata kuliah ini membahas konsep-konsep dasar, asas-asas, dan sistem hukum yang berlaku, khususnya di Indonesia.",
-    progress: 45,
+    id: courseData.id,
+    name: courseData.name,
+    file_url: courseData.file_url,
+    description: "Mata kuliah ini membahas konsep-konsep dasar, asas-asas, dan sistem hukum yang berlaku.",
+    progress: 0,
     modules: [
-      { title: "Modul 1: Konsep Dasar Hukum", type: "pdf", duration: "10 Halaman" },
-      { title: " Modul 2: Sumber-sumber Hukum", type: "video", duration: "15 Menit" },
-      { title: "Kuis Modul 1 & 2", type: "quiz", duration: "20 Soal" },
+      { title: "Kuis Modul 1", type: "quiz", duration: "10 Soal" }
     ]
   };
 
@@ -78,12 +95,27 @@ export default function CourseDetail() {
           
           <div className="bg-brand-dark text-white p-6 rounded-2xl shadow-sm relative overflow-hidden">
             <div className="relative z-10 text-center space-y-4">
-              <BookOpen className="w-8 h-8 mx-auto text-brand-accent" />
-              <h3 className="font-bold">Butuh Bantuan?</h3>
-              <p className="text-sm text-white/80">Tanya AI Tutor jika kamu kesulitan memahami materi ini.</p>
-              <button onClick={() => navigate('/ai-tutor')} className="w-full py-2 bg-brand-accent text-brand-dark font-bold rounded-lg shadow-sm hover:opacity-90 transition-opacity">
-                Tanya AI Tutor
-              </button>
+              <div className="flex items-center space-x-3 mb-6">
+                <BookOpen className="w-8 h-8 text-brand-accent/50" />
+                <h1 className="text-xl font-bold text-white">Akses Materi</h1>
+              </div>
+              
+              <div className="flex flex-col space-y-3">
+                <button
+                  onClick={() => course.file_url ? window.open(course.file_url, '_blank') : alert('Admin belum mengunggah file materi untuk mata kuliah ini.')}
+                  className="bg-brand-accent text-brand-dark px-6 py-3 rounded-full font-bold hover:bg-white transition-colors flex items-center justify-center space-x-2"
+                >
+                  <BookOpen className="w-5 h-5" />
+                  <span>Baca Modul Materi</span>
+                </button>
+                <button 
+                  onClick={() => navigate(`/quiz/${course.id}`)}
+                  className="bg-white/10 text-white px-6 py-3 rounded-full font-semibold hover:bg-white/20 transition-colors flex items-center justify-center space-x-2"
+                >
+                  <FileText className="w-5 h-5" />
+                  <span>Mulai Kuis Pelatihan</span>
+                </button>
+              </div>
             </div>
             <div className="absolute top-[-20%] left-[-20%] w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
           </div>
