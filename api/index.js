@@ -117,7 +117,8 @@ app.post(['/api/ai/chat', '/ai/chat', '/api/index.js/ai/chat'], authenticateToke
     });
     res.json({ reply: response.choices[0].message.content });
   } catch (error) {
-    res.status(500).json({ error: 'Kesalahan AI.' });
+    console.error(error);
+    res.status(500).json({ error: error.message || 'Kesalahan AI.' });
   }
 });
 
